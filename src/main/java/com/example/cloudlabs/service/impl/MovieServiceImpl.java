@@ -90,10 +90,8 @@ public class MovieServiceImpl implements MovieService {
 
     public void uploadMovie(MultipartFile multipartFile, Long id) {
         try {
-            // имя файла (можно добавить UUID, чтобы избежать коллизий)
             String objectName = id + "/" + multipartFile.getOriginalFilename();
 
-            // загружаем в MinIO
             try (InputStream is = multipartFile.getInputStream()) {
                 minioClient.putObject(
                         PutObjectArgs.builder()
@@ -105,7 +103,6 @@ public class MovieServiceImpl implements MovieService {
                 );
             }
 
-            // обновляем запись о фильме
             Movie movie = movieRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Не найден фильм с id:" + id));
             movie.setFilePath(objectName);

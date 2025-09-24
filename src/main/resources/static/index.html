@@ -26,8 +26,6 @@
         <label for="movieId">Movie ID</label>
         <input id="movieId" type="text" value="2" />
         <button id="playBtn">Play</button>
-        <button id="openTabBtn" class="secondary">Open in new tab</button>
-        <button id="checkRangeBtn" class="secondary">Check Range support</button>
     </div>
 
     <video id="player" controls crossorigin="anonymous">
@@ -41,8 +39,6 @@
 <script>
     const player = document.getElementById('player');
     const playBtn = document.getElementById('playBtn');
-    const openTabBtn = document.getElementById('openTabBtn');
-    const checkRangeBtn = document.getElementById('checkRangeBtn');
     const out = document.getElementById('out');
     const movieIdInput = document.getElementById('movieId');
 
@@ -59,41 +55,6 @@
         player.load();
         try { await player.play(); out.textContent = `Воспроизведение: ${url}`; }
         catch(e){ out.textContent = `Ошибка при попытке play(): ${e}` }
-    });
-
-    openTabBtn.addEventListener('click', () => {
-        const id = movieIdInput.value.trim();
-        if (!id) return alert('Введите id');
-        window.open(apiUrl(id), '_blank');
-    });
-
-    checkRangeBtn.addEventListener('click', async () => {
-        const id = movieIdInput.value.trim();
-        if (!id) return alert('Введите id');
-        const url = apiUrl(id);
-        out.textContent = `Проверка ${url} ...`;
-
-        // 1) Пробуем HEAD
-        try {
-            const headResp = await fetch(url, { method: 'HEAD' });
-            out.textContent = `HEAD -> ${headResp.status} ${headResp.statusText}\n` +
-                Array.from(headResp.headers.entries()).map(h => h.join(': ')).join('\n');
-        } catch (err) {
-            out.textContent = `HEAD запрос завершился ошибкой: ${err}\n`;
-        }
-
-        // 2) Пробуем GET с Range: bytes=0-0
-        try {
-            const rangeResp = await fetch(url, { method: 'GET', headers: { 'Range': 'bytes=0-0' } });
-            out.textContent += '\n\nGET (Range: bytes=0-0) -> ' + rangeResp.status + ' ' + rangeResp.statusText + '\n'
-                + Array.from(rangeResp.headers.entries()).map(h => h.join(': ')).join('\n');
-
-            // прочитаем кусочек тела (необязательно)
-            const chunk = await rangeResp.arrayBuffer();
-            out.textContent += '\n\nRead bytes: ' + chunk.byteLength;
-        } catch (err) {
-            out.textContent += '\n\nGET с Range завершился ошибкой: ' + err;
-        }
     });
 </script>
 </body>
