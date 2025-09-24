@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: WebfluxTest
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_LOCAL_PORT}
+    username: ${RABBITMQ_DEFAULT_USER}
+    password: ${RABBITMQ_DEFAULT_PASS}
+
+  flyway:
+    enabled: false
+
+  servlet:
+    multipart:
+      max-file-size: 5GB
+      max-request-size: 5GB
+server:
+  port: ${SERVER_PORT}
+
+broker:
+  type: ${BROKER_TYPE}
+
+#kafka:
+#  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+#  topic:
+#    movie-events: ${KAFKA_TOPIC_MOVIE_EVENTS}
+#    watch-events: ${KAFKA_TOPIC_WATCH_EVENTS}
+
+rabbitmq:
+  exchange:
+    movie: ${RABBITMQ_EXCHANGE_MOVIE}
+  queue:
+    movie: ${RABBITMQ_QUEUE_MOVIE}
+    watch: ${RABBITMQ_QUEUE_WATCH}
+  routing:
+    key:
+      movie: ${RABBITMQ_ROUTING_KEY_MOVIE}
+      watch: ${RABBITMQ_ROUTING_KEY_WATCH}
+
+storage:
+  endpoint: ${STORAGE_ENDPOINT}
+  accessKey: ${STORAGE_ACCESS_KEY}
+  secretKey: ${STORAGE_SECRET_KEY}
+  region: ${STORAGE_REGION}
+  bucket: ${STORAGE_BUCKET}
