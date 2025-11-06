@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="'Bucket: ' + ${bucket}">Bucket</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+</head>
+<body>
+<div class="container py-4">
+    <h1 th:text="'Бакет: ' + ${bucket}"></h1>
+
+
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/s3/buckets/{bucket}/upload}" method="post" enctype="multipart/form-data" class="row g-2 align-items-center">
+                <div class="col-6">
+                    <input type="file" name="file" required class="form-control" />
+                </div>
+                <div class="col-3">
+                    <button class="btn btn-primary">Upload</button>
+                    <a class="btn btn-secondary" th:href="@{/s3}">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Objects</h5>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="o : ${objects}">
+                    <td th:text="${o}"></td>
+                    <td>
+                        <a th:href="@{/api/s3/buckets/{bucket}/object(name=${o}, bucket=${bucket})}"
+                           class="btn btn-sm btn-outline-primary">Download</a>
+
+                        <form th:action="@{/s3/buckets/{bucket}/delete(bucket=${bucket})}" method="post"
+                              style="display:inline-block;" onsubmit="return confirm('Удалить объект?')">
+                            <input type="hidden" name="name" th:value="${o}" />
+                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${objects.size()} == 0">
+                    <td colspan="2">Не найдено объектов</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+</body>
+</html>

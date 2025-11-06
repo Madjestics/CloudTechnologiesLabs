@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>S3 — Buckets</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+</head>
+<body>
+<div class="container py-4">
+    <h1 class="mb-4">S3 — Buckets</h1>
+
+
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/s3/createBucket}" method="post" class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <label>
+                        <input name="bucketName" class="form-control" placeholder="Название нового бакета" required />
+                    </label>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary">Создать бакет</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Existing buckets</h5>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="b : ${buckets}">
+                    <td th:text="${b}"></td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/s3/buckets/{bucket}(bucket=${b})}">View</a>
+                        <form th:action="@{/s3/deleteBucket}" method="post" style="display:inline-block;" onsubmit="return confirm('Удалить бакет?')">
+                            <input type="hidden" name="bucketName" th:value="${b}" />
+                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${buckets.size()} == 0">
+                    <td colspan="2">Не найдено бакетов</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+</body>
+</html>
