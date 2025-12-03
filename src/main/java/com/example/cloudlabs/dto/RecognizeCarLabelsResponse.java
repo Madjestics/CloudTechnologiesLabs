@@ -5,6 +5,9 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Ответ от VK API на запрос распознавания номеров машин
+ */
 @Data
 public class RecognizeCarLabelsResponse {
     private int status;

@@ -36,6 +36,7 @@ public class RecognizeController {
             RecognizeCarLabelsResponse response = recognizeService.recognizeCarLabels(file);
             model.addAttribute("response", response);
             model.addAttribute("uploadedFileName", file.getOriginalFilename());
+            //доработка изображения для отображения областей и вывода информации о распознанном номере
             try (InputStream inputStream = file.getInputStream()) {
                 String dataUri = recognizeService.createImage(inputStream, response);
                 model.addAttribute("imageDataUrl", dataUri);

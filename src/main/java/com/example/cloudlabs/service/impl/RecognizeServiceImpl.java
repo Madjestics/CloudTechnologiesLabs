@@ -41,14 +41,12 @@ public class RecognizeServiceImpl implements RecognizeService {
 
     @Override
     public RecognizeCarLabelsResponse recognizeCarLabels(MultipartFile multipartFile) throws IOException {
-        // 1) Собираем URL с query params
         String url = UriComponentsBuilder
                 .fromUriString("https://smarty.mail.ru/api/v1/objects/detect")
                 .queryParam("oauth_token", token)
                 .queryParam("oauth_provider", "mcs")
                 .toUriString();
 
-        // 2) Формируем JSON для meta
         Map<String, Object> meta = Map.of(
                 "mode", new String[]{"car_number"},
                 "images", new Object[]{ Map.of("name", "file") }
@@ -100,7 +98,7 @@ public class RecognizeServiceImpl implements RecognizeService {
         return new HttpEntity<>(metaJson, metaHeaders);
     }
 
-    public static byte[] annotateImage(InputStream imageStream, RecognizeCarLabelsResponse response) throws IOException {
+    private byte[] annotateImage(InputStream imageStream, RecognizeCarLabelsResponse response) throws IOException {
         BufferedImage img = ImageIO.read(imageStream);
         if (img == null) throw new IOException("Не удалось прочитать изображение");
 
@@ -154,13 +152,7 @@ public class RecognizeServiceImpl implements RecognizeService {
                             prob = typeProb.getProb();
                         }
 
-                        String mainText = lbl.getEng() != null && !lbl.getEng().isBlank() ? lbl.getEng() : lbl.getRus();
-                        String caption = mainText != null ? mainText : "";
-                        if (typeLabel != null && !typeLabel.isEmpty()) {
-                            caption = caption + " [" + typeLabel + " " + String.format("%.2f", prob) + "]";
-                        } else {
-                            caption = caption + " [" + String.format("%.2f", prob) + "]";
-                        }
+                        String caption = getTextWithProb(lbl, typeLabel, prob);
 
                         FontRenderContext frc = g.getFontRenderContext();
                         Rectangle2D textBounds = g.getFont().getStringBounds(caption, frc);
@@ -191,5 +183,16 @@ public class RecognizeServiceImpl implements RecognizeService {
         } finally {
             g.dispose();
         }
+    }
+
+    private static String getTextWithProb(RecognizeCarLabelsResponse.Label lbl, String typeLabel, double prob) {
+        String mainText = lbl.getEng() != null && !lbl.getEng().isBlank() ? lbl.getEng() : lbl.getRus();
+        String textWithProb = mainText != null ? mainText : "";
+        if (typeLabel != null && !typeLabel.isEmpty()) {
+            textWithProb = textWithProb + " [" + typeLabel + " " + String.format("%.2f", prob) + "]";
+        } else {
+            textWithProb = textWithProb + " [" + String.format("%.2f", prob) + "]";
+        }
+        return textWithProb;
     }
 }
