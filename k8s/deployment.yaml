@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-tech-labs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cloud-tech-labs
+  template:
+    metadata:
+      labels:
+        app: cloud-tech-labs
+    spec:
+      containers:
+        - name: cloud-api
+          image: docker.io/library/cloud-api:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: cloud-api-secret

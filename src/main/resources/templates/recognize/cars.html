@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Распознавание номеров</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-..." crossorigin="anonymous">
+
+    <style>
+        body { padding: 24px; background:#f8f9fa; }
+        .card { margin-bottom: 18px; }
+        pre { max-height: 360px; overflow:auto; background:#0d1117; color:#cdd9e5; padding:12px; border-radius:6px; }
+        .small-muted { font-size: .85rem; color:#6c757d; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <h1 class="h4">Распознавание</h1>
+            <p class="small-muted">Загрузите изображение.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form th:action="@{/recognize}" method="post" enctype="multipart/form-data" class="row g-3">
+                <div class="col-md-6">
+                    <label for="file" class="form-label">Выберите изображение</label>
+                    <input id="file" name="file" type="file" accept="image/*" class="form-control"/>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </div>
+
+                <div class="col-12">
+                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${imageDataUrl != null}" class="card">
+        <div class="card-header">
+            <strong>Аннотированное изображение</strong>
+            <span class="small text-muted ms-2" th:if="${uploadedFileName != null}" th:text="${uploadedFileName}"></span>
+        </div>
+        <div class="card-body text-center">
+            <img th:src="${imageDataUrl}" alt="result" class="img-fluid" style="max-height:80vh; border:1px solid #ddd;"/>
+        </div>
+    </div>
+
+    <div th:if="${response != null}" class="card">
+        <div class="card-header">
+            <strong>Ответ</strong>
+            <span class="small text-muted ms-2">status = <span th:text="${response.status}">-</span></span>
+        </div>
+
+        <div class="card-body">
+            <div th:if="${response.body == null}">
+                <div class="text-muted">Тело ответа пусто.</div>
+            </div>
+
+            <div th:if="${response.body != null}">
+                <div th:if="${#lists.isEmpty(response.body.carNumberLabels)}" class="text-muted">
+                    car_number_labels пуст.
+                </div>
+
+                <div th:each="cnLabel,cnIdx : ${response.body.carNumberLabels}">
+                    <div class="mb-3">
+
+                        <div th:if="${#lists.isEmpty(cnLabel.labels)}" class="small text-muted">labels пуст.</div>
+
+                        <div th:if="${!#lists.isEmpty(cnLabel.labels)}" class="table-responsive">
+                            <table class="table table-sm table-hover align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th style="width:4%">#</th>
+                                    <th style="width:20%">eng</th>
+                                    <th style="width:12%">rus</th>
+                                    <th style="width:10%">prob</th>
+                                    <th style="width:20%">coord</th>
+                                    <th>types_prob</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="lbl,idx : ${cnLabel.labels}">
+                                    <td th:text="${idx.index + 1}"></td>
+                                    <td th:text="${lbl.eng}"></td>
+                                    <td th:text="${lbl.rus}"></td>
+                                    <td th:text="${#numbers.formatDecimal(lbl.prob, 1, 'COMMA', 4, 'POINT')}"></td>
+
+                                    <td class="nowrap">
+                                        <span th:if="${lbl.coord != null and lbl.coord.size() > 0}"
+                                              th:text="${lbl.coord.toString().replace('[','').replace(']','')}"></span>
+                                        <span th:if="${lbl.coord == null or lbl.coord.size() == 0}" class="text-muted">-</span>
+                                    </td>
+
+                                    <td>
+                                        <div th:if="${#lists.isEmpty(lbl.typesProb)}" class="text-muted">-</div>
+                                        <table th:if="${!#lists.isEmpty(lbl.typesProb)}" class="table table-borderless table-sm mb-0">
+                                            <thead>
+                                            <tr><th style="width:70px">type</th><th>prob</th></tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="tp : ${lbl.typesProb}">
+                                                <td th:text="${tp.type}">ru</td>
+                                                <td th:text="${#numbers.formatDecimal(tp.prob, 1, 'COMMA', 4, 'POINT')}">0.3256</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                    <hr th:if="${!cnIdx.last}"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

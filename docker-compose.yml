@@ -1,50 +1,12 @@
 services:
-  postgres:
-    image: postgres:15rc1-alpine
-    env_file:
-      - .env
-    ports:
-      - $POSTGRES_LOCAL_PORT:$POSTGRES_DOCKER_PORT
-    healthcheck:
-      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
-      interval: 5s
-      timeout: 2s
-      retries: 3
-    volumes:
-      - .db-data:/var/lib/postgresql/data
-
-  flyway:
-    image: flyway/flyway:9-alpine
-    command: -locations=filesystem:/flyway/sql -connectRetries=60 migrate
-    env_file:
-      - .env
-    volumes:
-      - ./migration:/flyway/sql
-    depends_on:
-      - postgres
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    env_file:
-      - .env
-    ports:
-      - $RABBITMQ_LOCAL_PORT:$RABBITMQ_DOCKER_PORT
-      - $RABBITMQ_ADMIN_LOCAL_PORT:$RABBITMQ_ADMIN_DOCKER_PORT
-
   api:
     image: cloud-api
     build:
       context: .
       dockerfile: Dockerfile
-    depends_on:
-      postgres:
-        condition: service_healthy
     ports:
       - "8080:8080"
     env_file:
       - .env
     environment:
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      - SERVER_PORT=8080

@@ -1,1 +1,0 @@
-ALTER TABLE public.movie ADD COLUMN IF NOT EXISTS filepath text NULL DEFAULT ''::text;
